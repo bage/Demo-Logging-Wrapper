@@ -13,8 +13,8 @@ using System.Security;
 
 [assembly: AssemblyVersion("3.0.2")]
 
-[assembly: AssemblyDelaySign(false)]
-[assembly: AssemblyKeyFile(@"..\tcs\bin\TopCoder.snk")]
-[assembly: AssemblyKeyName("")]
+//[assembly: AssemblyDelaySign(false)]
+//[assembly: AssemblyKeyFile(@"..\tcs\bin\TopCoder.snk")]
+//[assembly: AssemblyKeyName("")]
 
 [assembly: AllowPartiallyTrustedCallers]

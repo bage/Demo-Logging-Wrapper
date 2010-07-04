@@ -26,14 +26,14 @@
   
   
   <PropertyGroup>
-    <GlobalTargetsPath>..\Global.targets</GlobalTargetsPath>
-    <BambooTargetsFile>..\Bamboo.targets</BambooTargetsFile>
+    <GlobalTargetsPath>.\Global.targets</GlobalTargetsPath>
+    <BambooTargetsFile>.\Bamboo.targets</BambooTargetsFile>
   </PropertyGroup>
   <Import Project="$(GlobalTargetsPath)" Condition="Exists($(GlobalTargetsPath))" />
   <PropertyGroup Condition="!Exists($(GlobalTargetsPath))">
     <!-- Library repositories -->
-    <ext_bin>..\tcs\bin\third_party</ext_bin>
-    <tcs_bin>..\tcs\bin\tcs</tcs_bin>
+    <ext_bin>.\lib\bin\third_party</ext_bin>
+    <tcs_bin>.\lib\bin\tcs</tcs_bin>
   </PropertyGroup>
   <PropertyGroup>
     <!--  
@@ -42,7 +42,7 @@
     -->
     <target_bin>$(tcs_bin)</target_bin>
   </PropertyGroup>
-  <Import Project="..\Common.targets" />
+  <Import Project=".\Common.targets" />
   <Import Project="Custom.targets" Condition="Exists('Custom.targets')" />
   <Import Project="$(BambooTargetsFile)" Condition="Exists($(BambooTargetsFile))" />
   <ProjectExtensions>

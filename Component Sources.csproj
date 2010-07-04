@@ -25,15 +25,15 @@
     
          
   <PropertyGroup>
-    <GlobalTargetsPath>..\Global.targets</GlobalTargetsPath>
-    <DistributionTargetsFile>..\Distribution.targets</DistributionTargetsFile>
+    <GlobalTargetsPath>.\Global.targets</GlobalTargetsPath>
+    <DistributionTargetsFile>.\Distribution.targets</DistributionTargetsFile>
   </PropertyGroup>
   <Import Project="$(GlobalTargetsPath)" Condition="Exists($(GlobalTargetsPath))" />    
 
   <PropertyGroup Condition="!Exists($(GlobalTargetsPath))"> 
     <!-- Library repositories -->
-    <ext_bin>..\tcs\bin\third_party</ext_bin>
-    <tcs_bin>..\tcs\bin\tcs</tcs_bin>        
+    <ext_bin>.\lib\bin\third_party</ext_bin>
+    <tcs_bin>.\lib\bin\tcs</tcs_bin>        
   </PropertyGroup>
   
   <PropertyGroup>
@@ -44,7 +44,7 @@
     <target_bin>$(tcs_bin)</target_bin>
   </PropertyGroup>
   
-  <Import Project="..\Common.targets" />
+  <Import Project="Common.targets" />
   <Import Project="$(DistributionTargetsFile)" Condition="Exists($(DistributionTargetsFile))" />
   
   <ProjectExtensions>

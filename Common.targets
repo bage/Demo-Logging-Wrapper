@@ -1,0 +1,149 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
+
+  <!-- MSBuild Community tasks are used on some of the targets because they provide useful tasks as
+       Nunit, Zip, etc.
+   -->
+  <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets"/>
+
+  <PropertyGroup>
+    <ComponentVersion>$(ComponentVersionMajor).$(ComponentVersionMinor).$(ComponentVersionMicro)</ComponentVersion>
+    <ComponentPath>$(ComponentDistFileName)\$(ComponentVersion)</ComponentPath>
+
+    <!-- Component distribution structure. -->
+    <BuildDistDir>$(BuildDir)\dist</BuildDistDir>
+    <BuildTcsDistDir>$(BuildDistDir)\$(ComponentDistFileName)-$(ComponentVersion)</BuildTcsDistDir>
+    <DistBinDir>$(BuildDistDir)\bin</DistBinDir>
+    <ComponentZipFile>$(DistBinDir)\$(ComponentPath)\$(ComponentDistFileName).zip</ComponentZipFile>
+    <ComponentDistZipFile>$(BuildDistDir)\$(ComponentDistFileName)-$(ComponentVersion).zip</ComponentDistZipFile>
+  </PropertyGroup>
+
+  <Choose>
+    <!-- If we're dealing with a library then the extension will be 'dll' otherwise it's an 'exe'. -->
+    <When Condition="$(OutputType)=='Library'">
+      <PropertyGroup>
+        <ComponentPackageExtension>dll</ComponentPackageExtension>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ComponentPackageExtension>exe</ComponentPackageExtension>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <PropertyGroup>
+    <!-- NCover's output properties -->
+    <CoverageOutputXml>$(TestLogDir)\$(ComponentPackage).Test.$(ComponentPackageExtension)-coverage.xml</CoverageOutputXml>
+    <CoverageOutputStyleSheet>$(TestLogDir)\coverage.xsl</CoverageOutputStyleSheet>
+    <CoverageNunitXml>$(TestLogDir)\$(ComponentPackage).Test.$(ComponentPackageExtension)-coverage-unit.xml</CoverageNunitXml>
+    <CoverageLogFile>$(TestLogDir)\NCover.log.txt</CoverageLogFile>
+  </PropertyGroup>  
+
+  <Target Name="CleanSolution">
+    <MSBuild Targets="Clean"
+             Projects="$(MSBuildProjectDirectory)\Component Sources.csproj"/>
+
+    <MSBuild Targets="Clean"
+         Projects="$(MSBuildProjectDirectory)\Component Tests.csproj"/>
+
+    <RemoveDir Directories="$(BuildDir)"/>
+    <RemoveDir Directories="$(TestLogDir)"/>
+  </Target>
+
+  <Target Name="TestSetup" DependsOnTargets="Build" />
+  <Target Name="TestTearDown" DependsOnTargets="Build" />
+  
+  <!-- Run Unit tests -->
+  <Target Name="Test"
+    DependsOnTargets="Build"
+    Condition="$(ProjectKind)=='ComponentTests'">
+
+    <CallTarget Targets="TestSetup"/>
+    
+    <MakeDir Directories="$(TestLogDir)" Condition="!Exists('$(TestLogDir)')"/>
+    <Message Text="NUnit utility was not found. Please check its path in Global.targets file or the definition for &quot;NUnitConsole&quot; property from above in this file."
+             Condition="!Exists('$(Nunit)')"/>
+
+    <Message Text="Starting NUnit test run ..."/>
+    <NUnit Assemblies="$(BuildClassDir)\$(ComponentPackage).Test.$(ComponentPackageExtension)"
+           OutputXmlFile="$(TestLogDir)\$(ComponentPackage).Test.$(ComponentPackageExtension)-results.xml"
+           ToolPath="$(NunitDir)"
+           ContinueOnError="true"
+           WorkingDirectory="$(MSBuildProjectDirectory)"/>
+    <Xslt Inputs="$(TestLogDir)\$(ComponentPackage).Test.$(ComponentPackageExtension)-results.xml"
+          Xsl="$(NunitSummaryTransform)"
+          Output="$(TestLogDir)\$(ComponentPackage).Test.$(ComponentPackageExtension)-results.txt"
+          Condition="Exists('$(NunitSummaryTransform)')"/>
+          
+    <CallTarget Targets="TestTearDown"/>                
+  </Target>
+
+
+  <!-- Create test coverage report. -->
+  <Target Name="NCoverReport"
+    DependsOnTargets="Build"
+    Condition="$(ProjectKind)=='ComponentTests'">
+    
+    <CallTarget Targets="TestSetup"/>
+    
+    <MakeDir Directories="$(TestLogDir)" Condition="!Exists('$(TestLogDir)')"/>
+
+    <Message Text="NCoverConsole utility was not found. Please check its path in Global.targets file or the definition for &quot;NCoverConsole&quot; property from above in this file."
+             Condition="!Exists('$(NCoverConsole)')"/>
+
+    <Message Text="Starting NUnit code coverage run ..."/>
+
+    <Exec Command="&quot;$(NCoverConsole)&quot; &quot;$(NunitConsole)&quot; $(BuildClassDir)\$(ComponentPackage).Test.$(ComponentPackageExtension) /xml=$(CoverageNunitXml) //l $(CoverageLogFile) //x $(CoverageOutputXml) //ea $(ComponentPackage).CoverageExcludeAttribute"
+          WorkingDirectory="$(MSBuildProjectDirectory)"/>
+
+    <Copy SourceFiles="$(NCoverStyle)" DestinationFiles="$(CoverageOutputStyleSheet)"/>
+
+    <Message Text="NCover report generated." />
+    
+    <CallTarget Targets="TestTearDown"/>
+  </Target>
+
+  <Target Name="Dist"
+    DependsOnTargets="Build">
+    <MakeDir Directories="$(DistBinDir)\$(ComponentPath)" Condition="!Exists('$(DistBinDir)\$(ComponentPath)')"/>
+
+    <CreateItem Include="$(BuildClassDir)\*.dll;$(BuildClassDir)\*.exe" Exclude="$(BuildClassDir)\*Test.dll;$(BuildClassDir)\*Test.exe">
+      <Output TaskParameter="Include" ItemName="DistributionLibraries"/>
+    </CreateItem>
+
+    <Zip Files="@(DistributionLibraries)"
+         ZipFileName="$(ComponentZipFile)"
+         Flatten="true"/>
+  </Target>
+
+  <Target Name="Doc" DependsOnTargets="Build">
+    <MakeDir Directories="$(BuildDir)\docs" Condition="!Exists('$(BuildDir)\docs')"/>
+    <Exec Command='&quot;$(TCDoc)&quot; /a:"$(MSBuildProjectDirectory)\$(BuildClassDir)\$(ComponentPackage).$(ComponentPackageExtension)" /OutputDir:"$(MSBuildProjectDirectory)\$(BuildDir)\docs"' WorkingDirectory="$(TCDocHome)" />
+  </Target>
+
+  <!--Create FXCop report-->
+  <!--Property group for optional inclusion/output of fxcop report as html-->
+  <Choose>
+    <!--The Exists() method is used instead of checking if FxCopTransform is null.   Exists() works because "Exists(null)" always returns false-->
+    <When Condition="!Exists('$(FxCopTransform)')">
+      <PropertyGroup>
+        <FxOutputFileName>$(MSBuildProjectDirectory)\$(BuildDir)\log\$(ComponentPackage).FxCop.xml</FxOutputFileName>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FxOutputFileName>$(MSBuildProjectDirectory)\$(BuildDir)\log\$(ComponentPackage).FxCop.html</FxOutputFileName>
+        <ApplyOutXslTransform>/outXsl:"$(FxCopTransform)" /applyoutXsl</ApplyOutXslTransform>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <Target Name="FxCop" DependsOnTargets="Build">
+    <Message Text="$(FxCopTransform)"/>
+    <MakeDir Directories="$(BuildDir)\log" Condition="!Exists('$(BuildDir)\log')"/>
+    <Copy SourceFiles="@(BuildDependencies)" DestinationFolder="$(BuildClassDir)\"/>
+    <Exec Command="&quot;$(FxCopExecutable)&quot; /file:&quot;$(MSBuildProjectDirectory)\$(BuildClassDir)\$(ComponentPackage).$(ComponentPackageExtension)&quot; /out:&quot;$(FxOutputFileName)&quot; $(ApplyOutXslTransform)" WorkingDirectory="$(FxCopPath)"/>
+  </Target>
+</Project>

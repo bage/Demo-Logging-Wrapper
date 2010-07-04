@@ -1,0 +1,28 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+     <!-- Reference to NUnit -->
+    <NUnit>E:\download\NUnit-2.4.8-net-2.0\bin\nunit.framework.dll</NUnit>
+    <NUnitDir>E:\download\NUnit-2.4.8-net-2.0\bin</NUnitDir>
+    <NUnitConsole>E:\download\NUnit-2.4.8-net-2.0\bin\nunit-console.exe</NUnitConsole>
+    <NUnitSummaryTransform>E:\download\NUnit-2.4.8-net-2.0\doc\files\Summary.xslt</NUnitSummaryTransform>
+
+    <!-- Reference to NCover -->
+    <NCoverHome>C:\Program Files\NCover</NCoverHome>
+    <NCoverConsole>$(NCoverHome)\NCover.Console.exe</NCoverConsole>
+    <NCoverStyle>$(NCoverHome)\Coverage.xsl</NCoverStyle>
+
+    <!-- Reference to TC Code Documenter-->
+    <TCDocHome>e:\Code Documenter</TCDocHome>
+    <TCDoc>$(TCDocHome)\CodeDocumenter.exe</TCDoc>
+
+    <!-- Reference to FXCop -->
+    <FxCopPath>C:\Program Files\Microsoft FxCop 1.35\</FxCopPath>
+    <FxCopExecutable>FxCopCmd.exe</FxCopExecutable>
+    <FxCopTransform>$(FxCopPath)\Xml\FxCopReport.xsl</FxCopTransform>
+
+    <!-- Library repositories -->
+    <ext_bin>.\lib\bin\third_party</ext_bin>
+    <tcs_bin>.\lib\bin\tcs</tcs_bin>
+    <hermes_bin>..\tcs\bin\hermes</hermes_bin>
+  </PropertyGroup>
+</Project>

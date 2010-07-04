@@ -1,0 +1,154 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+      This file is *not* intended to be used alone.  It only provides targets for creating distributions.
+      Common.targets contains the standard build targets.
+    -->
+  <PropertyGroup>
+    <!-- Build directory structure. -->
+    <BuildDocsDir>$(BuildDir)\docs</BuildDocsDir>
+    <BuildDocPackageDir>$(BuildDir)\doc_package</BuildDocPackageDir>
+
+    <TCDocsFile>tcdocs.zip</TCDocsFile>
+    <DocPackageFile>$(ComponentDistFileName)_docs.zip</DocPackageFile>
+
+    <!-- Distribution & Submission files. -->
+    <DesignDistZipFile>$(ComponentDistFileName)_$(ComponentVersion)_design_dist.zip</DesignDistZipFile>
+    <DevDistZipFile>$(ComponentDistFileName)_$(ComponentVersion)_dev_dist.zip</DevDistZipFile>
+    <DesignSubmissionZipFile>$(ComponentDistFileName)_$(ComponentVersion)_design_submission.zip</DesignSubmissionZipFile>
+    <DevSubmissionZipFile>$(ComponentDistFileName)_$(ComponentVersion)_dev_submission.zip</DevSubmissionZipFile>
+  </PropertyGroup>
+
+  <!-- Files which are to be included in the dev distribution. -->
+  <ItemGroup>
+    <DevDistFiles Include="$(ConfigDir)\**" Exclude="$(ConfigDir)\**\.svn/**" />
+    <DevDistFiles Include="$(SrcDir)\**" Exclude="$(SrcDir)\**\.svn/**" />
+    <DevDistFiles Include="$(DocsDir)\**" Exclude="$(DocsDir)\**\.svn/**"/>
+    <DevDistFiles Include="$(TestFilesDir)\**" Exclude="$(TestFilesDir)\**\.svn/**"/>
+    <DevDistFiles Include="Component Sources.csproj;Component Tests.csproj;$(ComponentName).sln;Build.dependencies;Build.version;"/>
+    <DevDistFiles Include="README.txt"/>
+  </ItemGroup>
+
+  <!-- Files which are to be included in the design distribution
+       , design submission, dev submission.
+    -->
+  <ItemGroup>
+    <DesignDistFiles Include="@(DevDistFiles)"/>
+
+    <DesignSubmissionFiles Include="@(DevDistFiles)"/>
+    <DesignSubmissionFiles Include="Custom.targets" Condition="Exists('Custom.targets')"/>
+
+    <DevSubmissionFiles Include="@(DevDistFiles)"/>
+    <DevSubmissionFiles Include="$(TestLogDir)/**"/>
+    <DevSubmissionFiles Include="Custom.targets" Condition="Exists('Custom.targets')"/>
+  </ItemGroup>
+
+  <Target Name="DesignDist">
+    <Zip ZipFileName="$(DesignDistZipFile)"
+         Files="@(DesignDistFiles)"/>
+  </Target>
+
+  <Target Name="DevDist">
+    <Zip ZipFileName="$(DevDistZipFile)"
+         Files="@(DevDistFiles)"/>
+  </Target>
+
+  <Target Name="DesignSubmission" >
+    <Zip ZipFileName="$(DesignSubmissionZipFile)"
+         Files="@(DesignSubmissionFiles)"/>
+  </Target>
+
+  <Target Name="DevSubmission">
+    <MSBuild Targets="Test"
+             Projects="$(MSBuildProjectDirectory)\Component Tests.csproj"/>
+  
+    <Zip ZipFileName="$(DevSubmissionZipFile)"
+         Files="@(DevSubmissionFiles)"/>
+  </Target>
+
+  <!-- The distribution files for the libraries will be copied in the target repository.
+       Also during this target will be copied the test coverage information to docs/ directory.
+  -->
+  <Target Name="DistTcs" DependsOnTargets="CreateDist">
+    <MakeDir Directories="$(target_bin)\$(ComponentDistFileName)\$(ComponentVersion)\dist"
+             Condition="!Exists('$(target_bin)\$(ComponentDistFileName)\$(ComponentVersion)\dist')"/>
+
+    <Copy SourceFiles="$(ComponentDistZipFile)" DestinationFolder="$(target_bin)\$(ComponentPath)\dist" />
+    <Copy SourceFiles="$(BuildClassDir)\$(ComponentPackage).$(ComponentPackageExtension)" DestinationFolder="$(target_bin)\$(ComponentPath)" />
+  </Target>
+
+  <ItemGroup>
+    <DocFiles Include="$(DocsDir)\$(ComponentDistFileName)_Class_Diagram*"/>
+    <DocFiles Include="$(DocsDir)\$(ComponentDistFileName)_Use_Case_Diagram*"/>
+    <DocFiles Include="$(DocsDir)\$(ComponentDistFileName)_Sequence_Diagram*"/>
+    <DocFiles Include="$(DocsDir)\$(ComponentDistFileName)_Requirements_Specification.pdf*"/>
+    <DocFiles Include="$(DocsDir)\$(ComponentDistFileName)_Component_Specification.pdf*"/>    
+  </ItemGroup>
+
+  <Target Name="DeployLib" DependsOnTargets="Build">
+    <Copy SourceFiles="$(BuildClassDir)\$(ComponentPackage).$(ComponentPackageExtension)" DestinationFolder="$(target_bin)\$(ComponentPath)" />
+  </Target>
+
+  <Target Name="PackageDocs" DependsOnTargets="Doc">
+    <MakeDir Directories="$(BuildDocPackageDir)" Condition="!Exists('$(BuildDocPackageDir)')"/>
+
+    <CreateItem Include="$(BuildDocsDir)\**">
+      <Output TaskParameter="Include" ItemName="TCDocs"/>
+    </CreateItem>
+
+    <Zip ZipFileName="$(BuildDocPackageDir)\$(TCDocsFile)"
+         WorkingDirectory="$(BuildDocsDir)"
+         Files="@(TCDocs)"/>
+
+    <Copy SourceFiles="@(DocFiles)"
+          DestinationFolder="$(BuildDocPackageDir)"/>
+
+    <CreateItem Include="$(BuildDocPackageDir)\**">
+      <Output TaskParameter="Include" ItemName="PackageDocFiles"/>
+    </CreateItem>
+
+    <Zip ZipFileName="$(BuildDir)\$(DocPackageFile)"
+         Files="@(PackageDocFiles)"
+         Flatten="true"/>
+  </Target>
+
+  <ItemGroup>
+    <DistributionFiles Include="$(ConfigDir)\**\*" Exclude="$(ConfigDir)\**\.svn/**" />
+    <DistributionFiles Include="$(DocsDir)\**\*" Exclude="$(DocsDir)\**\.svn\**" />
+    <DistributionFiles Include="$(SrcDir)\**\*" Exclude="$(SrcDir)\**\.svn\**" />
+    <DistributionFiles Include="$(TestFilesDir)\**\*" Exclude="$(TestFilesDir)\**\.svn\**" />
+    
+    <DistributionFiles Include="Component Sources.csproj;Component Tests.csproj;$(ComponentName).sln;Build.dependencies;Build.version;"/>
+    <DistributionFiles Include="Custom.targets" Condition="Exists('Custom.targets')"/>
+    
+    <DistributionFiles Include="README.txt"/>
+  </ItemGroup>
+
+  <Target Name="CreateDist" DependsOnTargets="Dist;PackageDocs">
+    <Copy SourceFiles="@(DistributionFiles)"
+          DestinationFiles="@(DistributionFiles->'$(BuildTcsDistDir)\%(RelativeDir)%(Filename)%(Extension)')"/>
+          
+    <!--  COVERAGE REPORTS -->
+    <MakeDir Directories="$(BuildTcsDistDir)\docs\coverage" Condition="!Exists('$(BuildTcsDistDir)\docs\coverage')"/>
+    <Copy SourceFiles="$(CoverageOutputXml);$(CoverageNunitXml);$(CoverageLogFile);$(CoverageOutputStyleSheet)"
+          DestinationFolder="$(BuildTcsDistDir)\docs\coverage"/>
+    
+    <!-- Inline API Docs -->
+    <Copy SourceFiles="$(BuildClassDir)\$(ComponentPackage).xml"
+          DestinationFolder="$(BuildTcsDistDir)\docs\xml\source"/>
+    <Copy SourceFiles="$(BuildClassDir)\$(ComponentPackage).Test.xml"
+          DestinationFolder="$(BuildTcsDistDir)\docs\xml\tests"/>
+    
+    <!-- TC Docs-->
+    <Copy SourceFiles="$(BuildDocPackageDir)\$(TCDocsFile)"
+          DestinationFolder="$(BuildTcsDistDir)\docs"/>
+
+    <CreateItem Include="$(BuildDistDir)\**" Exclude="$(ComponentDistZipFile)">
+      <Output TaskParameter="Include" ItemName="ZipDistributionFiles"/>
+    </CreateItem>
+
+    <Zip ZipFileName="$(ComponentDistZipFile)"
+         Files="@(ZipDistributionFiles)"
+         WorkingDirectory="$(BuildDistDir)" Condition="!Exists($(ComponentDistZipFile))" />
+  </Target>
+
+</Project>
