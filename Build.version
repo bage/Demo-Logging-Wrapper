@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!--Component Name and Version Information-->
+    <ComponentName>Logging Wrapper</ComponentName>
+    <ComponentDistFileName>logging_wrapper</ComponentDistFileName>
+    <ComponentPackage>TopCoder.LoggingWrapper</ComponentPackage>
+    <ComponentPackageDir>TopCoder\LoggingWrapper</ComponentPackageDir>
+    <ComponentVersionMajor>3</ComponentVersionMajor>
+    <ComponentVersionMinor>0</ComponentVersionMinor>
+    <ComponentVersionMicro>2</ComponentVersionMicro>
+    <ComponentVersionBuild>1</ComponentVersionBuild>
+  </PropertyGroup>
+</Project>

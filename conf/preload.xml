@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ConfigManager>
+  <namespace name="TopCoder.Util.ConfigurationManager">
+    <property name="preload">
+      <value>..\..\test_files\loggersBugFix.xml</value>
+    </property>
+
+    <!-- we use ConfigurationManagerFormatProvider to ensure the format is compatiable with Config Manager  -->
+    <!--<property name="FormatProvider">
+      <property name="Assembly">
+        <value>TopCoder.Configuration.File</value>
+      </property>
+      <property name="Class">
+        <value>TopCoder.Configuration.File.Xml.ConfigurationManagerFormatProvider</value>
+      </property>
+    </property>-->
+  </namespace>
+</ConfigManager>

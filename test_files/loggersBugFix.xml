@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <TopCoder.LoggingWrapper.LogManager logger_class="TopCoder.LoggingWrapper.DiagnosticImpl"
+                                        logger_assembly="TopCoder.LoggingWrapper.Test.dll"
+                                        logger_name="LogTest"
+                                        propagate_exceptions="false"
+                                        default_config="Test"
+                                        default_level="INFO"
+                                        source="DefaultSource"
+                                        filtered_levels="FATAL;ERROR">
+
+        <ExceptionLogger logger_class="TopCoder.LoggingWrapper.DiagnosticImpl"
+                         logger_name="LogTest"
+                         propagate_exceptions="true"
+                         source="ExceptionSource"/>
+
+        <NamedMessages>
+            <SimpleMessage text="The parameters are {0} and {1}"
+                           default_level="INFO"
+                           parameters="myParam1;myParam2"/>
+            <Log4NetMessage text="The parameters is %property{myParam}"
+                            default_level="WARN"
+                            parameters="param"/>
+        </NamedMessages>
+    </TopCoder.LoggingWrapper.LogManager>
+
+    <!-- Example configuration with minimum setting -->
+    <TopCoder.LoggingWrapper.Minimum logger_class="TopCoder.LoggingWrapper.SimpleLogger"
+                                     logger_name="MinimumLogger"/>
+
+    <!-- Example configuration with exception propagated -->
+    <TopCoder.LoggingWrapper.ExceptionPropagated logger_class="TopCoder.LoggingWrapper.SimpleLogger"
+                                                 logger_name="ExceptionPropagatedLogger"
+                                                 propagate_exceptions="true"/>
+
+    <!-- Example configuration with levels filtered -->
+    <TopCoder.LoggingWrapper.LevelsFiltered logger_class="TopCoder.LoggingWrapper.SimpleLogger"
+                                            logger_name="LevelsFilteredLogger"
+                                            propagate_exceptions="true"
+                                            filtered_levels="FATAL;ERROR"/>
+       
+    <!-- zero configuration for test -->
+    <TopCoder.LoggingWrapper.ZeroConfiguration logger_class="TopCoder.LoggingWrapper.SimpleLogger"
+                                               logger_name="LevelsFilteredLogger"
+                                               propagate_exceptions="true"
+                                               default_config="Release"/>
+        
+    <!-- Example configuration for DiagnosticImpl -->
+    <TopCoder.LoggingWrapper.DiagnosticImpl logger_class="TopCoder.LoggingWrapper.DiagnosticImpl"
+                                            logger_name="LogTest"
+                                            propagate_exceptions="true"
+                                            source="SourceForDiagnosticImpl"/>
+
+    <!-- Example configuration for Log4NETImpl -->
+    <TopCoder.LoggingWrapper.Log4NETImpl logger_class="TopCoder.LoggingWrapper.Log4NETImpl"
+                                         logger_name="Log4NETLogger"
+                                         propagate_exceptions="true"
+                                         config_file="..\..\test_files\log4net.config"/>
+
+    <!-- Example configuration for ELSImpl -->
+    <TopCoder.LoggingWrapper.ELSImpl logger_class="TopCoder.LoggingWrapper.ELS.ELSImpl"
+                                     logger_name="LogTest"
+                                     default_level="INFO"
+                                     propagate_exceptions="true">
+        <object name="loggingService">
+            <assembly value="TopCoder.LoggingWrapper.Test.dll"/>
+            <type_name value="TopCoder.LoggingWrapper.ELS.ILoggingServiceDummyImpl"/>
+        </object>
+    </TopCoder.LoggingWrapper.ELSImpl>
+    
+    <!-- Example configuration for ELSAppender-->
+    <TopCoder.LoggingWrapper.ELS.ELSAppender logger_class="TopCoder.LoggingWrapper.ELS.ELSImpl"
+                                     logger_name="LogTest"
+                                     default_level="INFO"
+                                     propagate_exceptions="true">
+        <object name="loggingService">
+            <assembly value="TopCoder.LoggingWrapper.Test.dll"/>
+            <type_name value="TopCoder.LoggingWrapper.ELS.ILoggingServiceDummyImpl"/>
+        </object>
+    </TopCoder.LoggingWrapper.ELS.ELSAppender>
+
+    <!-- Example configuration for EnterpriseLibraryLogger -->
+    <TopCoder.LoggingWrapper.EnterpriseLibraryLogger logger_class="TopCoder.LoggingWrapper.EntLib.EnterpriseLibraryLogger"
+                                                     logger_name="EnterpriseLibraryLogger"
+                                                     propagate_exceptions="true"
+                                                     Category="MyCategory"/>
+
+    <!-- configuration using SimpleLogger for testing -->
+    <TopCoder.LoggingWrapper.SimpleLogger logger_class="TopCoder.LoggingWrapper.SimpleLogger"
+                                          logger_name="SimpleLogger"/>
+                                          
+</configuration>
