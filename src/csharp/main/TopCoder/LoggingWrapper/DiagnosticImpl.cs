@@ -154,7 +154,7 @@ namespace TopCoder.LoggingWrapper
                     "' does not exist in properties dictionary.");
             }
 
-            if (source == string.Empty)
+            if (source == string.Empt)
             {
                 throw new ConfigException("Property '" + SOURCE +
                     "' is an empty string.");

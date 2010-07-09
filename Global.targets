@@ -2,7 +2,7 @@
   <PropertyGroup>
      <!-- Reference to NUnit -->
     <NUnit>E:\download\NUnit-2.4.8-net-2.0\bin\nunit.framework.dll</NUnit>
-    <NUnitDir>E:\download\NUnit-2.4.8-net-2.0\bin</NUnitDir>
+    <NUnitDir>E:\download\NUnit-2.4.8-net-2.0</NUnitDir>
     <NUnitConsole>E:\download\NUnit-2.4.8-net-2.0\bin\nunit-console.exe</NUnitConsole>
     <NUnitSummaryTransform>E:\download\NUnit-2.4.8-net-2.0\doc\files\Summary.xslt</NUnitSummaryTransform>
 
